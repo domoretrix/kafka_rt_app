@@ -10,18 +10,18 @@ Simplifying the pipeline: it is requesting the price of Bitcoin from a REST API 
 
 ## What tools is it using?
 For data processing purposes, it is mostly using Kafka ecosystem tools like Kafka for storage, Kafka Connect for out of Kafka connections and ksqlDB (Kafka Streaming with SQL) for real time data processing. 
-Here's a complete list:
-**Zookeeper** for Kafka cluster management
-**Kafka** for data stream storage
-**Kafka UI** to visualize topics, messages, brokers
-**Kafka Connect** for writing and reading Kafka topics 
-**Kafka Schema registry** to store message schemas
-**ksqlDB** and implicitly Kafka Streaming for real time data processing
-**ksqlDB CLI** to interact the ksqlDB cluster and send SQL jobs
-Aside from the above, it is also using:
-**Nginx** for load balancing ([the real reason for this load balancer is to provide a fail tolerant method for the ksqlDB servers to connect with any of the Kafka Connect workers ](https://github.com/confluentinc/ksql/issues/7527))
-**MongoDB** NoSQL database to sync statistics.
-**NodeJS** to host a web socket that provides the application with a real time API
+Here's a complete list: \
+**Zookeeper** for Kafka cluster management \
+**Kafka** for data stream storage \
+**Kafka UI** to visualize topics, messages, brokers \
+**Kafka Connect** for writing and reading Kafka topics \
+**Kafka Schema registry** to store message schemas \
+**ksqlDB** and implicitly Kafka Streaming for real time data processing \
+**ksqlDB CLI** to interact the ksqlDB cluster and send SQL jobs \
+Aside from the above, it is also using: \
+**Nginx** for load balancing ([the real reason for this load balancer is to provide a fail tolerant method for the ksqlDB servers to connect with any of the Kafka Connect workers ](https://github.com/confluentinc/ksql/issues/7527)) \
+**MongoDB** NoSQL database to sync statistics. \
+**NodeJS** to host a web socket that provides the application with a real time API \
 **ReactNative** application UI for plotting candle and line charts
 
 ![docker diag](src/docker_compose_diag.png)
