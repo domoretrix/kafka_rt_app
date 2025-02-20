@@ -1,0 +1,246 @@
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.8.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+    ports:
+      - "2181:2181"
+
+  kafka-1:
+    image: confluentinc/cp-kafka:7.8.0
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://host.docker.internal:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+    depends_on:
+      - zookeeper
+
+  kafka-2:
+    image: confluentinc/cp-kafka:7.8.0
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:19093,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9093,DOCKER://host.docker.internal:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 2
+    depends_on:
+      - zookeeper
+
+  kafka-3:
+    image: confluentinc/cp-kafka:7.8.0
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-3:19094,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9094,DOCKER://host.docker.internal:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 3
+    depends_on:
+      - zookeeper
+  
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:29092,kafka-2:29093,kafka-3:29094
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+
+  kafka-connect1:
+    image: confluentinc/cp-kafka-connect-base:7.8.0
+    ports:
+      - "8183:8183"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      CONNECT_LISTENERS: "http://kafka-connect1:8183" #outter-cluster communication
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect1  #inter-node communication
+      CONNECT_REST_ADVERTISED_PORT: 8183 #inter-node communication
+      CONNECT_GROUP_ID: kafka-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: /usr/connectors/jars
+    volumes:
+      - ./connector-jars:/usr/connectors/jars
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+  
+  kafka-connect2:
+    image: confluentinc/cp-kafka-connect-base:7.8.0
+    ports:
+      - "8283:8283"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      CONNECT_LISTENERS: "http://kafka-connect2:8283" #outter-cluster communication
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect2 #inter-node communication
+      CONNECT_REST_ADVERTISED_PORT: 8283 #inter-node communication
+      CONNECT_GROUP_ID: kafka-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: /usr/connectors/jars
+    volumes:
+      - ./connector-jars:/usr/connectors/jars
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+  
+  kafka-connect3:
+    image: confluentinc/cp-kafka-connect-base:7.8.0
+    ports:
+      - "8383:8383"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      CONNECT_LISTENERS: "http://kafka-connect3:8383" #outter-cluster communication
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect3 #inter-node communication
+      CONNECT_REST_ADVERTISED_PORT: 8383 #inter-node communication
+      CONNECT_GROUP_ID: kafka-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: /usr/connectors/jars
+    volumes:
+      - ./connector-jars:/usr/connectors/jars
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+
+  kafka-connect-lb:
+    image: nginx:latest
+    depends_on:
+      - kafka-connect1
+      - kafka-connect2
+      - kafka-connect3
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./load-balancer/nginx.conf:/etc/nginx/nginx.conf
+    
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.8.0
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:29092,kafka-2:29093,kafka-3:29094
+      SCHEMA_REGISTRY_CUB_KAFKA_TIMEOUT: 300
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+  
+  ksqldb-server1:
+    image: confluentinc/cp-ksqldb-server:7.8.0
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - schema-registry
+      - kafka-connect-lb
+    ports:
+      - "8188:8088"
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka-1:29092,kafka-2:29093,kafka-3:29094
+      KSQL_LISTENERS: http://ksqldb-server1:8088 #outter-cluster communication
+      KSQL_ADVERTISED_LISTENER: http://ksqldb-server1:8188 #inter-node communication
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KSQL_KSQL_CONNECT_URL: http://kafka-connect-lb:8083
+  
+  ksqldb-server2:
+    image: confluentinc/cp-ksqldb-server:7.8.0
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - schema-registry
+      - kafka-connect-lb
+    ports:
+      - "8288:8088"
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka-1:29092,kafka-2:29093,kafka-3:29094
+      KSQL_LISTENERS: http://ksqldb-server2:8088 #outter-cluster communication
+      KSQL_ADVERTISED_LISTENER: http://ksqldb-server2:8288 #inter-node communication
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KSQL_KSQL_CONNECT_URL: http://kafka-connect-lb:8083
+
+  ksql-cli:
+    image: confluentinc/cp-ksqldb-cli:7.8.0
+    depends_on:
+      - ksqldb-server1
+      - ksqldb-server2
+      - mongo1
+    entrypoint: /bin/sh -c "while ! curl -s http://ksqldb-server1:8088/info; do sleep 10; done; ksql http://ksqldb-server1:8088 -f /usr/tmp/scripts/build_pipeline.sql && tail -f /dev/null"
+    volumes:
+      - ./ksql:/usr/tmp/scripts
+    tty: true
+
+  mongo1:
+    image: mongo:7.0
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - 27017:27017
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 5s
+      retries: 30
+  
+  api:
+    build:
+      context: api
+    command: node server.js
+    ports: 
+      - 8085:8085
+    tty: true
+    depends_on:
+      - mongo1
+
+  frontend:
+    build:
+      context: frontend
+    command: npm start --web
+    depends_on:
+      - api
+    ports:
+      - 3000:8081
+    tty: true
