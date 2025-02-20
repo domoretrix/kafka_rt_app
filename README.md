@@ -38,11 +38,11 @@ docker compose down --volumes
 ```
 
 ## Application Endpoints
-Applicaton UI http://localhost:3000
-KafkaUI http://localhost:8080
-KafkaConnect load balancer: http://localhost:8083
-KafkaConnect worker1: http://localhost:8183
-KafkaConnect worker2: http://localhost:8283
-KafkaConnect worker3: http://localhost:8383
-ksqlDB Server worker1: http://localhost:8188
+Applicaton UI http://localhost:3000 \
+KafkaUI http://localhost:8080 \
+KafkaConnect load balancer: http://localhost:8083 \
+KafkaConnect worker1: http://localhost:8183 \
+KafkaConnect worker2: http://localhost:8283 \
+KafkaConnect worker3: http://localhost:8383 \
+ksqlDB Server worker1: http://localhost:8188 \
 ksqlDB Server worker3: http://localhost:8288
